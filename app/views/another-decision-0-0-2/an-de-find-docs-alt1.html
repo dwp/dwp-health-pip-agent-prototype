@@ -457,8 +457,8 @@
       label: {
         html: DynamicHeader
       },
-      hint: {
-        text: ""
+      attributes: {
+        autocomplete: "off"
       },
       id: "find-document",
       name: "find-document",
@@ -469,10 +469,78 @@
           <div class="govuk-button-group">
             {{ govukButton({
               text: "Apply filter",
-              classes: "govuk-button--secondary govuk-!-margin-bottom-8 govuk-!-margin-top-0"
+              attributes: {
+                id: "prototype-filter-search"
+              }
             }) }}
 
 
+            {{ govukButton({
+              text: "Clear",
+              attributes: {
+                id: "prototype-filter-clear"
+              },
+              classes: "govuk-button--secondary " + ("govuk-visually-hidden" if not data["find-document"])
+            }) }}
+            <script>
+              const searchButton = document.getElementById("prototype-filter-search");
+              const clearButton = document.getElementById("prototype-filter-clear");
+
+              const searchBox = document.getElementById("find-document");
+              const checkboxes = document.querySelectorAll(".govuk-checkboxes__item");
+
+              const divider = document.querySelector(".govuk-checkboxes__divider");
+
+              const label = document.querySelector(".govuk-fieldset__heading");
+
+              function runSearch() {
+                const documents = {
+                    found: 0,
+                    hidden: 0,
+                }
+                checkboxes.forEach($item => {
+                  const checkbox = $item.querySelector("input");
+                  const label = $item.querySelector("label");
+                  if (label.innerHTML.toLowerCase().includes(searchBox.value.toLowerCase()) || checkbox.checked === true || checkbox.value === "Advanced") {
+                    $item.style.display = "block";
+                    documents.found ++;
+                  } else {
+                    $item.style.display = "none";
+                    documents.hidden ++;
+                  }
+                })
+
+                if (documents.found === 1) {
+                  divider.classList.add("govuk-visually-hidden");
+                  label.innerHTML = `1 document found (${documents.hidden} hidden)`
+                } else {
+                  divider.classList.remove("govuk-visually-hidden");
+                  label.innerHTML = `${documents.found} document found ${documents.hidden === 0 ? "" : `(${documents.hidden} hidden)`}`;
+                }
+
+                if(documents.found) {}
+              }
+
+              clearButton.addEventListener("click", (e) => {
+                clearButton.classList.add("govuk-visually-hidden");
+                searchBox.value = "";
+                runSearch();
+                e.preventDefault();
+              });
+
+              searchButton.addEventListener("click", (e) => {
+                console.log("Attempting in browser filter");
+
+                
+                runSearch();
+                if(searchBox.value.toLowerCase() !== "") {
+                  clearButton.classList.remove("govuk-visually-hidden");
+                }
+                
+                e.preventDefault();
+              });
+
+            </script>
   </div>
 
 
